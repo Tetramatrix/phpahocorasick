@@ -50,11 +50,29 @@ require_once ( "ahocorasick.php" );
 //echo $tree->match("botttea");
 
 
+//$tree = new Ahocorasick\Ahocorasick();
+//$tree->add("fast");
+//$tree->add("sofa");
+//$tree->add("so");
+//$tree->add("take");
+//echo $tree->match("takesofasofastfassofatakesossosofastake so");
+
+//$tree = new Ahocorasick\Ahocorasick();
+//$tree->add("one");
+//$tree->add("two");
+//$tree->add("three");
+//$tree->add("four");
+//echo $tree->match("Hey one! How are you?");
+
+
 $tree = new Ahocorasick\Ahocorasick();
-$tree->add("fast");
-$tree->add("sofa");
-$tree->add("so");
-$tree->add("take");
-echo $tree->match("takesofasofastfassofatakesossosofastake so");
+$tree->add("hi");
+$tree->add("hips");
+$tree->add("hip");
+$tree->add("hit");
+$tree->add("chip");
+echo $tree->match("microchips");
+
+
 
 ?>

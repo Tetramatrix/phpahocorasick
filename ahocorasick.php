@@ -95,9 +95,9 @@ class Trie {
         {
             $this->result[]=$n->word->get();
         }
-        if ($n->fail->pid && $n->pid->fail!=$this->head && $n->pid->fail->c!=$n->c)
+        if ($n->pid->is_leaf==false && $n->pid!=$this->head && $n->pid->c!=$n->c)
         {
-            $n=$this->fail($n->fail->pid);
+            $n=$this->fail($n->pid);
         }
     }
  
@@ -150,8 +150,7 @@ class Trie {
                 if (is_object($n->fail) && $n->fail->is_leaf==false && $n->fail->c!=$n->c)
                 {
                     $this->fail($n->fail);
-                }
-                if (is_object($n->fail->pid) && $n->fail->pid->c!=$n->c)
+                } else if (is_object($n->fail->pid) && $n->fail->pid->c!=$n->c)
                 {
                     $this->fail($n->fail->pid);
                 } else  if (is_object($n->pid->fail) &&
@@ -250,11 +249,10 @@ class Trie {
                 {
                     $this->search($this->head,$key,$pos+1);
                 }
-                if ($n->fail->is_leaf==false && $n->fail->c!=$n->c)
+                if ($n->fail->is_leaf==false && $n->fail->c!=$n->c && ($pos+2)<strlen($key))
                 {
                     $this->fail($n->fail);
-                }
-                if (is_object($n->fail->pid) && $n->fail->pid->c!=$n->c)
+                } else if (is_object($n->fail->pid) && $n->fail->pid->c!=$n->c)
                 {
                     $this->fail($n->fail->pid);
                 } else if (is_object($n->pid->fail) &&
