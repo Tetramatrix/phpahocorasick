@@ -50,12 +50,12 @@ require_once ( "ahocorasick.php" );
 //echo $tree->match("botttea");
 
 
-//$tree = new Ahocorasick\Ahocorasick();
-//$tree->add("fast");
-//$tree->add("sofa");
-//$tree->add("so");
-//$tree->add("take");
-//echo $tree->match("takesofasofastfassofatakesossosofastake so");
+$tree = new Ahocorasick\Ahocorasick();
+$tree->add("fast");
+$tree->add("sofa");
+$tree->add("so");
+$tree->add("take");
+echo $tree->match("takesofasofastfassofatakesossosofastakeso");
 
 //$tree = new Ahocorasick\Ahocorasick();
 //$tree->add("one");
@@ -65,14 +65,21 @@ require_once ( "ahocorasick.php" );
 //echo $tree->match("Hey one! How are you?");
 
 
-$tree = new Ahocorasick\Ahocorasick();
-$tree->add("hi");
-$tree->add("hips");
-$tree->add("hip");
-$tree->add("hit");
-$tree->add("chip");
-echo $tree->match("microchips");
+//$tree = new Ahocorasick\Ahocorasick();
+//$tree->add("hi");
+//$tree->add("hips");
+//$tree->add("hip");
+//$tree->add("hit");
+//$tree->add("chip");
+//echo $tree->match("microchips");
 
+//$tree = new Ahocorasick\Ahocorasick();
+//$tree->add("ab");
+//$tree->add("bc");
+//$tree->add("bab");
+//$tree->add("d");
+//$tree->add("abcde");
+//echo $tree->match("xbabcdex");
 
 
 ?>

@@ -97,7 +97,7 @@ class Trie {
         }
         if ($n->pid->is_leaf==false && $n->pid->c!=0 && $n->pid->c!=$n->c)
         {
-            $n=$this->fail($n->pid);
+            $n=$this->fail($n->pid,$pos);
         }
     }
  
@@ -111,7 +111,8 @@ class Trie {
         {
             if (is_object($n->mid->left) &&
                 $n->mid->left->char==substr($key,$pos+1,1) &&
-                    $n->mid->left->c != $n->c
+                        $n->char==substr($key,$c,1) &&
+                   $n->mid->left->c != $n->c
                 )
             {
                 $this->find ($n->mid->left, $key, $pos+1);
@@ -129,6 +130,7 @@ class Trie {
         {
             if (is_object($n->mid->right) &&
                 $n->mid->right->char==substr($key,$pos+1,1) &&
+                   $n->char==substr($key,$c,1) && 
                     $n->mid->right->c != $n->c
                 )
             {
@@ -153,20 +155,23 @@ class Trie {
                     
                 } else if (is_object($n->fail->pid) && $n->fail->pid->c!=$n->c)
                 {
-                    $this->fail($n->fail->pid);
-                
-                } else if (is_object($n->pid->fail) &&
+                    $this->fail($n->fail->pid,$pos);
+                }
+                else if (is_object($n->pid->fail) &&
                     $n->pid->fail->c!=0 &&
                         $n->pid->fail->c!=$n->c)
                 {
                     $this->fail($n->pid->fail,$pos);
                 }
-                $this->result[$pos]=$n->word->get();
+                $this->result[$pos.$n->c]=$n->word->get();
                 return $pos;
             
             } else if ($n->is_leaf==false && $n!= $this->head)
             {
-                if (is_object($n->fail) && $n->fail->c!=0 && $n->fail->c!=$n->c)
+                if (is_object($n->fail) && $n->fail->c!=0 &&
+                    $n->fail->c!=$n->c &&
+                        $n->fail->mid->char!=substr($key,$pos+1,1)
+                    )
                 {
                     $pos=$this->find($n->fail, $key, $pos+1);    
                 
@@ -198,15 +203,15 @@ class Trie {
                 } else if (is_object($n->fail->pid) && $n->fail->pid->c!=$n->c)
                 {
                     $this->fail($n->fail->pid,$pos);
-                    
-                } else if (is_object($n->pid->fail) &&
-                    $n->pid->fail!=$this->head &&
-                        $n->pid->fail->c!=$n->c)
-                {
-                    $this->fail($n->pid->fail,$pos);
                 }
+                //else if (is_object($n->pid->fail) &&
+                //    $n->pid->fail!=$this->head &&
+                //        $n->pid->fail->c!=$n->c)
+                //{
+                //    $this->fail($n->pid->fail,$pos);
+                //}
                 
-                $this->result[$pos]=$n->word->get();
+                $this->result[$pos.$n->c]=$n->word->get();
                 return $pos;
             
             } else if ($n->is_leaf==true || $n==$this->head) 
@@ -215,7 +220,7 @@ class Trie {
                     $n->mid->char==substr($key,$pos+1,1)) 
                 {
                     $pos=$this->find($n->mid, $key, $pos+1);
-                
+                    
                 } else if (is_object($n->mid->right) &&
                     $n->mid->right->char==substr($key,$pos+1,1) &&
                         $n->mid->right->c != $n->c
@@ -390,9 +395,10 @@ class Ahocorasick extends Trie
        
         for ($i=0;$i<strlen($key);$i++) 
         {
-            $result = $this->find ( $this->head, $key , $i, $result);
-            if ($result==$i) $result++;
-            $i=($result-1);
+            $pos=$this->find($this->head, $key , $i, $tmp);
+            $tmp=$pos;
+            if ($tmp==$i) $tmp++;
+            $i=($tmp-1);
         }
        
        return implode(",",$this->result);
