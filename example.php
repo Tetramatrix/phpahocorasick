@@ -50,12 +50,12 @@ require_once ( "ahocorasick.php" );
 //echo $tree->match("botttea");
 
 
-$tree = new Ahocorasick\Ahocorasick();
-$tree->add("fast");
-$tree->add("sofa");
-$tree->add("so");
-$tree->add("take");
-echo $tree->match("takesofasofastfassofatakesossosofastakeso");
+//$tree = new Ahocorasick\Ahocorasick();
+//$tree->add("fast");
+//$tree->add("sofa");
+//$tree->add("so");
+//$tree->add("take");
+//echo $tree->match("takesofasofastfassofatakesossosofastakeso");
 
 //$tree = new Ahocorasick\Ahocorasick();
 //$tree->add("one");
@@ -81,5 +81,15 @@ echo $tree->match("takesofasofastfassofatakesossosofastakeso");
 //$tree->add("abcde");
 //echo $tree->match("xbabcdex");
 
+$tree = new Ahocorasick\Ahocorasick();
+$tree->add("The");
+$tree->add("han");
+$tree->add("and");
+$tree->add("pork");
+$tree->add("port");
+$tree->add("pot");
+$tree->add("ha");
+$tree->add("e");
+echo $tree->match("The pot had a handle");
 
 ?>

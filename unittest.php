@@ -98,5 +98,20 @@ class unittest extends PHPUnit_Framework_TestCase
     echo $tree->match("xbabcdex");
     $this->expectOutputString("abcde,ab,bab,ab,bc,d");
   }
+  
+  public function testexample9()
+  {
+    $tree = new Ahocorasick\Ahocorasick();
+    $tree->add("The");
+    $tree->add("han");
+    $tree->add("and");
+    $tree->add("pork");
+    $tree->add("port");
+    $tree->add("pot");
+    $tree->add("ha");
+    $tree->add("e");
+    echo $tree->match("The pot had a handle");
+    $this->expectOutputString("The,e,pot,ha,han,and,ha,e");
+  }
 }
 ?>
