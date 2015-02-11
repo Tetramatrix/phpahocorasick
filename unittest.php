@@ -19,7 +19,7 @@ class unittest extends PHPUnit_Framework_TestCase
     $tree->add ("c");
     $tree->add ("caa");
     echo $tree->match ("abccab");
-    $this->expectOutputString("a,ab,c,c,bc,a,ab"); 
+    $this->expectOutputString("a,ab,a,ab,c,c,bc"); 
   }
   
   public function testexample2()
@@ -31,7 +31,7 @@ class unittest extends PHPUnit_Framework_TestCase
     $tree->add("otto");
     $tree->add("tea");
     echo $tree->match("botttea");
-    $this->expectOutputString("tea,ott,bot");
+    $this->expectOutputString("'ott,bot,tea");
   }
   
   public function testexample3()
@@ -73,6 +73,18 @@ class unittest extends PHPUnit_Framework_TestCase
     $tree->add ("abc");
     echo $tree->match ("tabc");
     $this->expectOutputString("bc,abc");
+  }
+
+  public function testexample7()
+  {
+    $tree = new Ahocorasick\Ahocorasick();
+    $tree->add("hi");
+    $tree->add("hips");
+    $tree->add("hip");
+    $tree->add("hit");
+    $tree->add("chip");
+    echo $tree->match("microchips");
+    $this->expectOutputString("hi,hips,chips,chip");
   }
 }
 ?>

@@ -86,62 +86,62 @@ class Trie {
     }
 
     //////////////////////////////////////////////////////////////////////////
-    function fail (&$n)
+    function fail (&$n,$pos)
     {
         if (!is_object($n)) 
             return EMPTY_NODE;
         
         if ($n->is_leaf==false)
         {
-            $this->result[]=$n->word->get();
+            $this->result[$pos.$n->c]=$n->word->get();
         }
-        if ($n->pid->is_leaf==false && $n->pid!=$this->head && $n->pid->c!=$n->c)
+        if ($n->pid->is_leaf==false && $n->pid->c!=0 && $n->pid->c!=$n->c)
         {
             $n=$this->fail($n->pid);
         }
     }
  
     //////////////////////////////////////////////////////////////////////////
-    function search (&$n, $key, $pos)
+    function find (&$n, $key, $pos=START_CHAR_COUNT, $c=0)
     {
         if (!is_object($n)) 
             return EMPTY_NODE;
 
         if (ord ($key[$pos]) < ord($n->char))
         {
-            if (is_object($n->left)) 
+            if (is_object($n->mid->left) &&
+                $n->mid->left->char==substr($key,$pos+1,1) &&
+                    $n->mid->left->c != $n->c
+                )
             {
-                $this->search ($n->left, $key, $pos);
+                $this->find ($n->mid->left, $key, $pos+1);
+            
+            } else if (is_object($n->left)) 
+            {
+                $pos=$this->find ($n->left, $key, $pos);
                 
-            } else if (is_object($n->mid) && $n->mid->pid->char==substr($key,$pos-1,1))
+            } else if (is_object($n->fail) && $n->fail->c!=0 && $n->fail->c!=$n->c)
             {
-                $this->search ($n->mid, $key, $pos);
-                
-            } else if (is_object($n->fail) && $n->fail->char==substr($key,$pos+1,1))
-            {
-                $this->search ($n->fail, $key, $pos+1); 
-            } else if ($pos+1 <= strlen($key))
-            {
-                $this->search ($this->head, $key, $pos+1); 
+                $pos=$this->find ($n->fail, $key, $pos+1); 
             }
         }
         else if (ord($key[$pos]) > ord($n->char))
         {
-            if (is_object($n->right)) 
+            if (is_object($n->mid->right) &&
+                $n->mid->right->char==substr($key,$pos+1,1) &&
+                    $n->mid->right->c != $n->c
+                )
+            {
+                $this->find($n->mid->right, $key, $pos+1, $pos);
+            
+            } else if (is_object($n->right)) 
             {                               
-                $this->search ($n->right, $key, $pos);
+                $pos=$this->find ($n->right, $key, $pos);
                 
-            }  else if (is_object($n->mid) && $n->mid->pid->char==substr($key,$pos-1,1))
+            }   else if (is_object($n->fail) && $n->fail->c!=0 && $n->fail->c!=$n->c)
             {
-                $this->search ($n->mid, $key, $pos);
+                $pos=$this->find ($n->fail, $key, $pos+1); 
             
-            } else if (is_object($n->fail) && $n->fail->char==substr($key,$pos+1,1))
-            {
-                $this->search ($n->fail, $key, $pos+1); 
-            
-            } else if ($pos+1 <= strlen($key))
-            {
-                $this->search ($this->head, $key, $pos+1);
             }
         } else 
         {
@@ -149,142 +149,93 @@ class Trie {
             {
                 if (is_object($n->fail) && $n->fail->is_leaf==false && $n->fail->c!=$n->c)
                 {
-                    $this->fail($n->fail);
+                    $this->fail($n->fail,$pos);
+                    
                 } else if (is_object($n->fail->pid) && $n->fail->pid->c!=$n->c)
                 {
                     $this->fail($n->fail->pid);
-                } else  if (is_object($n->pid->fail) &&
-                    $n->pid->fail!=$this->head &&
+                
+                } else if (is_object($n->pid->fail) &&
+                    $n->pid->fail->c!=0 &&
                         $n->pid->fail->c!=$n->c)
                 {
-                    $this->fail($n->pid->fail);
+                    $this->fail($n->pid->fail,$pos);
                 }
-                $this->result[]=$n->word->get();
-                
-            } else if ($n->is_leaf==false && $n != $this->head)
+                $this->result[$pos]=$n->word->get();
+                return $pos;
+            
+            } else if ($n->is_leaf==false && $n!= $this->head)
             {
-                if (is_object($n->fail->mid) &&
+                if (is_object($n->fail) && $n->fail->c!=0 && $n->fail->c!=$n->c)
+                {
+                    $pos=$this->find($n->fail, $key, $pos+1);    
+                
+                } else if (is_object($n->fail->mid) &&
                     $n->fail->mid->char==substr($key,$pos+1,1) &&
                         $n->fail->mid->c != $n->c
-                            && $n->is_leaf==true
                     )
                 {
-                    $this->search($n->fail->mid, $key, $pos+1, $pos+1);
-                
-                } else if (is_object($n->mid) &&
-                    $n->mid->char==substr($key,$pos+1,1) &&
-                        $n->mid->c != $n->c
-                    )
-                {
-                    $this->search( $n->mid, $key, $pos+1);
+                    $this->find($n->fail->mid, $key, $pos+1);
                     
                 } else if (is_object($n->fail->mid->right) &&
                     $n->fail->mid->right->char==substr($key,$pos+1,1) &&
                         $n->fail->mid->right->c != $n->c
                     )
                 {
-                    $this->search($n->fail->mid->right, $key, $pos+1, $pos);
+                    $this->find($n->fail->mid->right, $key, $pos+1, $pos);
                 
                 } else if (is_object($n->fail->mid->left) &&
                     $n->fail->mid->left->char==substr($key,$pos+1,1) &&
                         $n->fail->mid->left->c != $n->c
                     )
                 {
-                    $this->search ($n->fail->mid->left, $key, $pos+1);
-                
-                } else if (is_object($n->fail->right->mid->right) &&
-                    $n->fail->right->mid->right->char==substr($key,$pos+1,1) &&
-                        $n->fail->right->mid->right->c != $n->c
-                    )
-                {
-                    $this->search($n->fail->right->mid->right, $key, $pos+1);
-                    
-                } else if (is_object($n->fail->right->mid->left) &&
-                    $n->fail->right->mid->left->char==substr($key,$pos+1,1) &&
-                        $n->fail->right->mid->left->c != $n->c
-                    )
-                {
-                    $this->search($n->fail->right->mid->left, $key, $pos+1);    
-                    
-                } else if (is_object($n->fail->left->mid->right) &&
-                    $n->fail->left->mid->right->char==substr($key,$pos+1,1) &&
-                        $n->fail->left->mid->right->c != $n->c
-                    )
-                {
-                    $this->search($n->fail->left->mid->right, $key, $pos+1);    
-                
-                } else if (is_object($n->fail->left->mid->left) &&
-                    $n->fail->left->mid->left->char==substr($key,$pos+1,1) &&
-                        $n->fail->left->mid->left->c != $n->c
-                    )
-                {
-                    $this->search($n->fail->left->mid->left, $key, $pos+1);
-                    
-                }  else if (is_object($n->fail->pid->left) &&
-                    $n->fail->pid->left->char==substr($key,$pos+1,1) &&
-                        $n->fail->pid->left->c != $n->c
-                    )
-                {
-                    $this->search($n->fail->pid->left, $key, $pos+1);
-                    
-                }  else if (is_object($n->fail->pid->right) &&
-                    $n->fail->pid->right->char==substr($key,$pos+1,1) &&
-                        $n->fail->pid->right->c != $n->c
-                    )
-                {
-                    $this->search($n->fail->pid->right, $key, $pos+1);   
-               
-                } else if (is_object($n->fail) &&
-                    $n->fail->char==substr($key,$pos+1,1) &&
-                        $n->fail->c != $n->c
-                    )
-                 {
-                    $this->search($n->fail, $key, $pos+1);
-                
-                } else if ($n->fail->c != $n->c)
-                {
-                    $this->search($n->fail, $key, $pos+1);
-                    
-                } else  if ($pos+1 <= strlen($key))
-                {
-                    $this->search($this->head,$key,$pos+1);
+                    $this->find ($n->fail->mid->left, $key, $pos+1);
                 }
+                
                 if ($n->fail->is_leaf==false && $n->fail->c!=$n->c && ($pos+2)<strlen($key))
                 {
-                    $this->fail($n->fail);
+                    $this->fail($n->fail,$pos);
                 } else if (is_object($n->fail->pid) && $n->fail->pid->c!=$n->c)
                 {
-                    $this->fail($n->fail->pid);
+                    $this->fail($n->fail->pid,$pos);
+                    
                 } else if (is_object($n->pid->fail) &&
                     $n->pid->fail!=$this->head &&
                         $n->pid->fail->c!=$n->c)
                 {
-                    $this->fail($n->pid->fail);
+                    $this->fail($n->pid->fail,$pos);
                 }
-                $this->result[]=$n->word->get();
                 
+                $this->result[$pos]=$n->word->get();
+                return $pos;
+            
             } else if ($n->is_leaf==true || $n==$this->head) 
             {
-                if (is_object($n->mid) && $n->mid->char==substr($key,$pos+1,1)) 
+                if (is_object($n->mid) &&
+                    $n->mid->char==substr($key,$pos+1,1)) 
                 {
-                    $this->search($n->mid, $key, $pos+1);
-                    
-                } else if ($n->fail==$this->head)
+                    $pos=$this->find($n->mid, $key, $pos+1);
+                
+                } else if (is_object($n->mid->right) &&
+                    $n->mid->right->char==substr($key,$pos+1,1) &&
+                        $n->mid->right->c != $n->c
+                    )
                 {
-                    $this->search($n->fail, $key, $pos+1);
-                    
-                } else if ($n->fail->c!=$n->c)
+                    $this->find($n->mid->right, $key, $pos+1);
+                
+                } else if (is_object($n->mid->left) &&
+                    $n->mid->left->char==substr($key,$pos+1,1) &&
+                        $n->mid->left->c != $n->c
+                    )
                 {
-                    $this->search($n->fail, $key, $pos+1);
-                } else if ($pos+1 <= strlen($key))
+                    $this->find($n->mid->left, $key, $pos+1);
+                } else if ($n->fail->c!=0)
                 {
-                    $this->search($this->head, $key, $pos+1); 
-                }
-            } else
-            {
-                $this->search ($this->head, $key, $pos); 
-            }
+                    $this->find($n->fail, $key, $pos+1);  
+                } 
+            } 
         }
+        return $pos;
     }
 }
 
@@ -298,7 +249,7 @@ class Payload
         $this->payload = $string;
     }
     
-    public function get ()
+    public function get()
     {
         return $this->payload;
     }
@@ -432,11 +383,18 @@ class Ahocorasick extends Trie
         }
     }
 
-    public function match ( $key )
+    public function match($key)
     {
        $this->head->fail=0;
        $this->makefail();
-       $result = $this->search ( $this->head, $key , START_CHAR_COUNT );
+       
+        for ($i=0;$i<strlen($key);$i++) 
+        {
+            $result = $this->find ( $this->head, $key , $i, $result);
+            if ($result==$i) $result++;
+            $i=($result-1);
+        }
+       
        return implode(",",$this->result);
     }
 }
