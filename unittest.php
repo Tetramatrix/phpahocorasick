@@ -113,5 +113,20 @@ class unittest extends PHPUnit_Framework_TestCase
     echo $tree->match("The pot had a handle");
     $this->expectOutputString("The,e,pot,ha,han,and,ha,e");
   }
+  
+  public function testexample10()
+  {
+    $tree = new Ahocorasick\Ahocorasick();
+    $tree->add("mercury");
+    $tree->add("venus");
+    $tree->add("earth");
+    $tree->add("mars");
+    $tree->add("jupiter");
+    $tree->add("saturn");
+    $tree->add("uranus");
+    $tree->add("pluto");
+    echo $tree->match("XXearthXXvenusaturnXXmarsaturn");
+    $this->expectOutputString("earth,saturn,venus,saturn,mars");
+  }
 }
 ?>

@@ -81,15 +81,27 @@ require_once ( "ahocorasick.php" );
 //$tree->add("abcde");
 //echo $tree->match("xbabcdex");
 
+//$tree = new Ahocorasick\Ahocorasick();
+//$tree->add("The");
+//$tree->add("han");
+//$tree->add("and");
+//$tree->add("pork");
+//$tree->add("port");
+//$tree->add("pot");
+//$tree->add("ha");
+//$tree->add("e");
+//echo $tree->match("The pot had a handle");
+
 $tree = new Ahocorasick\Ahocorasick();
-$tree->add("The");
-$tree->add("han");
-$tree->add("and");
-$tree->add("pork");
-$tree->add("port");
-$tree->add("pot");
-$tree->add("ha");
-$tree->add("e");
-echo $tree->match("The pot had a handle");
+$tree->add("mercury");
+$tree->add("venus");
+$tree->add("earth");
+$tree->add("mars");
+$tree->add("jupiter");
+$tree->add("saturn");
+$tree->add("uranus");
+$tree->add("pluto");
+echo $tree->match("XXearthXXvenusaturnXXmarsaturn");
+
 
 ?>
