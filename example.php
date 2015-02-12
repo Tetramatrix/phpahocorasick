@@ -32,12 +32,12 @@ require_once ("ahocorasick.php");
 //echo $tree->match("banananassata");
 
 //////////////////////////////  
-$tree = new Ahocorasick\ahocorasick();
-$tree->add("he");
-$tree->add("she");
-$tree->add("his");
-$tree->add("hers");
-echo $tree->match("ushers");
+//$tree = new Ahocorasick\ahocorasick();
+//$tree->add("he");
+//$tree->add("she");
+//$tree->add("his");
+//$tree->add("hers");
+//echo $tree->match("ushers");
 
 /////////////////////////////
 //$tree = new Ahocorasick\Ahocorasick();
@@ -62,7 +62,6 @@ echo $tree->match("ushers");
 //$tree->add("three");
 //$tree->add("four");
 //echo $tree->match("Hey one! How are you?");
-
 
 //$tree = new Ahocorasick\Ahocorasick();
 //$tree->add("hi");
@@ -109,4 +108,11 @@ echo $tree->match("ushers");
 //$tree->add("he");
 //$tree->add("her");
 //echo $tree->match("yasherhs");
+
+$tree = new Ahocorasick\Ahocorasick();
+$tree->add("AC");
+$tree->add("GTG");
+$tree->add("AACT");
+echo $tree->match("ACCGAGTGCGTGGACAAACTACGATTGTGGAATGAACT");
+
 ?>
