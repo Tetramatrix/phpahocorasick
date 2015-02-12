@@ -6,9 +6,9 @@
 *  
 ***************************************************************/
 
-require_once ( "ahocorasick.php" );
+require_once ("ahocorasick.php");
 //////////////////////////////
-//$tree = new Ahocorasick\Ahocorasick ();
+//$tree = new Ahocorasick\Ahocorasick();
 //$tree->add ("a");
 //$tree->add ("ab");
 //$tree->add ("bab");
@@ -19,26 +19,25 @@ require_once ( "ahocorasick.php" );
 //echo $tree->match ("abccab");
 
 //////////////////////////////
-//$tree = new Ahocorasick\ahocorasick ();
+//$tree = new Ahocorasick\ahocorasick();
 //$tree->add ("bc");
 //$tree->add ("abc");
 //echo $tree->match ("tabc");
 
 //////////////////////////////
-//$tree = new Ahocorasick\Ahocorasick ();
+//$tree = new Ahocorasick\Ahocorasick();
 //$tree->add("ananas");
 //$tree->add("antani");
 //$tree->add("assassin");
-//echo $tree->match ("banananassata");
+//echo $tree->match("banananassata");
 
 //////////////////////////////  
-//$tree = new Ahocorasick\ahocorasick ();
-//$tree->add("he");
-//$tree->add("she");
-//$tree->add("his");
-//$tree->add("hers");
-//echo $tree->match("ushers");
-
+$tree = new Ahocorasick\ahocorasick();
+$tree->add("he");
+$tree->add("she");
+$tree->add("his");
+$tree->add("hers");
+echo $tree->match("ushers");
 
 /////////////////////////////
 //$tree = new Ahocorasick\Ahocorasick();

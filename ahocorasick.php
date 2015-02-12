@@ -16,9 +16,90 @@ class Trie {
     var $c=0;
     var $pattern=0;
     var $result;
-    var $v=0;
     
-    function insert (&$n, $key, $pos, $is_leaf=false, $c=0, &$pid=EMPTY_NODE)
+    public function makefail()
+    {
+        $this->queue[]=$this->head;
+        $this->queue[]=$this->head;
+        $this->queue[]=$this->head;
+        
+        while (count($this->queue)>=3)
+        {
+            for ($i=0;$i<3;$i++)
+            {
+                $fail=array_shift($this->queue);    
+      
+                if ($fail->left)
+                {
+                    array_unshift($this->queue,$fail->left);
+                }
+                
+                if ($fail->mid)
+                {
+                    array_unshift($this->queue,$fail->mid);
+                }
+                
+                if ($fail->right)
+                {
+                    array_unshift($this->queue,$fail->right);
+                }
+                
+                if ($fail->fail==null && $fail!=$this->head)
+                {
+                    $fail->fail=$this->head;
+                }
+                
+                if ($fail->pid->fail)
+                {
+                    $pid=$fail->pid->fail;
+                    while ($fail->char!=$pid->char && $pid!=$this->head && $pid!=null)
+                    {
+                        $pid=$pid->pid->fail;
+                    }
+                    if ($pid==0)
+                    {
+                        $pid=$this->head;                
+                    }
+                    
+                    switch ($fail->char)
+                    {
+                        case $pid->char:
+                            $fail->fail=$pid->mid;      
+                        break;
+                        case $pid->left->char:
+                            $fail->fail=$pid->left;
+                        break;
+                        case $pid->right->char:
+                            $fail->fail=$pid->right;
+                        break;
+                        case $pid->left->left->char:
+                            $fail->fail=$pid->left->left;
+                        break;
+                        case $pid->left->mid->char:
+                            $fail->fail=$pid->left->mid;
+                        break;
+                        case $pid->left->right->char:
+                            $fail->fail=$pid->left->right;
+                        break;
+                        case $pid->right->left->char:
+                            $fail->fail=$pid->right->left;
+                        break;
+                        case $pid->right->left->char:
+                            $fail->fail=$pid->right->left;
+                        break;
+                        case $pid->right->mid->char:
+                            $fail->fail=$pid->right->mid;
+                        break;
+                        case $pid->right->right->char:
+                            $fail->fail=$pid->right->right;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    function insert (&$n, $key, $len, $pos, $is_leaf=false, $c=0, &$pid=EMPTY_NODE)
     {
         $a=false;
         if (!is_object($n))
@@ -37,8 +118,7 @@ class Trie {
             {
                 $c=0;
             }
-            
-            $c=$this->insert($n->left, $key, $pos, $is_leaf, $c, $n);    
+            $c=$this->insert($n->left, $key, $len, $pos, $is_leaf, $c, $n);    
         
         } else if (ord($key->payload[$pos]) > ord ($n->char))
         {
@@ -49,37 +129,34 @@ class Trie {
             {
                 $c=0;
             }
-            $c=$this->insert($n->right, $key, $pos, $is_leaf, $c, $n);
+            $c=$this->insert($n->right, $key, $len, $pos, $is_leaf, $c, $n);
             
-        }  else {
-        
-            if ( $pos+1 == strlen($key->payload))
+        }  else if ($pos+1 == $len)
+        {
+            $n->word = $key;
+            
+            if ($is_leaf==false && $a==true)  
             {
-                $n->word = $key;
+                $n->is_leaf = false;
+                $n->c=$c;
+                ++$c;
                 
-                if ($is_leaf==false && $a==true)  
-                {
-                    $n->is_leaf = false;
-                    $n->c=$c;
-                    ++$c;
-                    
-                } else if ($is_leaf==false)
-                {
-                    $n->is_leaf=false;
-                    $n->c=$c;
-                }
-                
-            } else {
-                
-                if ($is_leaf==false && $a==true) 
-                {
-                    ++$c;
-                } else if ($is_leaf==true)
-                {
-                    $c=0;
-                }
-                $c=$this->insert($n->mid, $key, $pos+1, $is_leaf, $c, $n);
+            } else if ($is_leaf==false)
+            {
+                $n->is_leaf=false;
+                $n->c=$c;
             }
+            
+        } else {
+            
+            if ($is_leaf==false && $a==true) 
+            {
+                ++$c;
+            } else if ($is_leaf==true)
+            {
+                $c=0;
+            }
+            $c=$this->insert($n->mid, $key, $len, $pos+1, $is_leaf, $c, $n);
         }
         return $c;     
     }
@@ -92,7 +169,7 @@ class Trie {
         
         if ($n->is_leaf==false)
         {
-            $this->result[$pos.":".$n->c]=$n->word->get();
+            $this->result[$pos][$n->c]=$n->word->get();
         }
         if ($n->pid->is_leaf==false && $n->pid->c!=0 && $n->pid->c!=$n->c)
         {
@@ -168,7 +245,7 @@ class Trie {
                         {
                             $this->fail($n->pid->fail,$pos, $c);
                         }
-                        $this->result[$pos.":".$n->c]=$n->word->get();
+                        $this->result[$pos][$n->c]=$n->word->get();
                     }
                     break;    
             
@@ -215,7 +292,7 @@ class Trie {
                         {
                             $this->fail($n->fail->pid,$pos);
                         }
-                        $this->result[$pos.":".$n->c]=$n->word->get();
+                        $this->result[$pos][$n->c]=$n->word->get();
                     }
                     break;
                     case ($n->is_leaf==true || $n==$this->head): 
@@ -314,92 +391,11 @@ class Ahocorasick extends Trie
     
     public function add($key)
     {
-        $c=$this->insert($this->head, new Payload($key), START_CHAR_COUNT,0,$this->c);        
+        $str=new Payload($key);
+        $c=$this->insert($this->head, $str, strlen($str->payload),START_CHAR_COUNT,0,$this->c);        
         $this->c=$c;
     }
     
-    public function makefail()
-    {
-        $this->queue[]=$this->head;
-        $this->queue[]=$this->head;
-        $this->queue[]=$this->head;
-        
-        while (count($this->queue)>=3)
-        {
-            for ($i=0;$i<3;$i++)
-            {
-                $fail=array_shift($this->queue);    
-      
-                if ($fail->left)
-                {
-                    array_unshift($this->queue,$fail->left);
-                }
-                
-                if ($fail->mid)
-                {
-                    array_unshift($this->queue,$fail->mid);
-                }
-                
-                if ($fail->right)
-                {
-                    array_unshift($this->queue,$fail->right);
-                }
-                
-                if ($fail->fail==null && $fail!=$this->head)
-                {
-                    $fail->fail=$this->head;
-                }
-                
-                if ($fail->pid->fail)
-                {
-                    $pid=$fail->pid->fail;
-                    while ($fail->char!=$pid->char && $pid!=$this->head && $pid!=null)
-                    {
-                        $pid=$pid->pid->fail;
-                    }
-                    if ($pid==0)
-                    {
-                        $pid=$this->head;                
-                    }
-                    
-                    switch ($fail->char)
-                    {
-                        case $pid->char:
-                            $fail->fail=$pid->mid;      
-                        break;
-                        case $pid->left->char:
-                            $fail->fail=$pid->left;
-                        break;
-                        case $pid->right->char:
-                            $fail->fail=$pid->right;
-                        break;
-                        case $pid->left->left->char:
-                            $fail->fail=$pid->left->left;
-                        break;
-                        case $pid->left->mid->char:
-                            $fail->fail=$pid->left->mid;
-                        break;
-                        case $pid->left->right->char:
-                            $fail->fail=$pid->left->right;
-                        break;
-                        case $pid->right->left->char:
-                            $fail->fail=$pid->right->left;
-                        break;
-                        case $pid->right->left->char:
-                            $fail->fail=$pid->right->left;
-                        break;
-                        case $pid->right->mid->char:
-                            $fail->fail=$pid->right->mid;
-                        break;
-                        case $pid->right->right->char:
-                            $fail->fail=$pid->right->right;
-                        break;
-                    }
-                }
-            }
-        }
-    }
-
     public function match($key)
     {
        $this->head->fail=0;
@@ -411,8 +407,14 @@ class Ahocorasick extends Trie
             if ($char==$i) $char++;
             $i=($char-1);
         }
-       
-       return implode(",",$this->result);
+        ksort($this->result);
+        foreach ($this->result as $k1=>$v1) {
+            ksort($v1);
+            foreach ($v1 as $k2=>$v2) {
+                $tmp[]=$v2;
+            }
+        }
+        return implode(",",$tmp);
     }
 }
 ?>
