@@ -23,7 +23,7 @@ class Trie {
         $a=false;
         if (!is_object($n))
         {
-            $n = new Node ($key->payload[$pos], $c, $pid);
+            $n = new Node($key->payload[$pos], $c, $pid);
             $n->c=$c;
             $a=true;
         }  
@@ -49,7 +49,6 @@ class Trie {
             {
                 $c=0;
             }
-            
             $c=$this->insert($n->right, $key, $pos, $is_leaf, $c, $n);
             
         }  else {
@@ -72,7 +71,7 @@ class Trie {
                 
             } else {
                 
-                if ($is_leaf==false && $a==true ) 
+                if ($is_leaf==false && $a==true) 
                 {
                     ++$c;
                 } else if ($is_leaf==true)
@@ -86,14 +85,14 @@ class Trie {
     }
 
     //////////////////////////////////////////////////////////////////////////
-    function fail (&$n,$pos)
+    function fail (&$n, $pos)
     {
         if (!is_object($n)) 
             return EMPTY_NODE;
         
         if ($n->is_leaf==false)
         {
-            $this->result[$pos.$n->c]=$n->word->get();
+            $this->result[$pos.":".$n->c]=$n->word->get();
         }
         if ($n->pid->is_leaf==false && $n->pid->c!=0 && $n->pid->c!=$n->c)
         {
@@ -102,148 +101,150 @@ class Trie {
     }
  
     //////////////////////////////////////////////////////////////////////////
-    function find (&$n, $key, $pos=START_CHAR_COUNT, $c=0)
+    function find (&$n, $key, $len, $pos=START_CHAR_COUNT, $c=0)
     {
         if (!is_object($n)) 
             return EMPTY_NODE;
 
-        if (ord ($key[$pos]) < ord($n->char))
+        $next=substr($key,$pos+1,1);
+        $prev=substr($key,$c,1);
+        $iscopy=($n->fail->c!=$n->c) ? true : false;
+        $ishead=($n->fail->c!=0) ? true : false;
+        
+        switch (true)
         {
-            if (is_object($n->mid->left) &&
-                $n->mid->left->char==substr($key,$pos+1,1) &&
-                        $n->char==substr($key,$c,1) &&
-                   $n->mid->left->c != $n->c
-                )
-            {
-                $this->find($n->mid->left, $key, $pos+1, $c);
-            
-            } else if (is_object($n->left)) 
-            {
-                $pos=$this->find($n->left, $key, $pos, $c);
-                
-            } else if (is_object($n->fail) && $n->fail->c!=0 && $n->fail->c!=$n->c)
-            {
-                $pos=$this->find($n->fail, $key, $pos+1, $c); 
-            }
-        }
-        else if (ord($key[$pos]) > ord($n->char))
-        {
-            if (is_object($n->mid->right) &&
-                $n->mid->right->char==substr($key,$pos+1,1) &&
-                   $n->char==substr($key,$c,1) && 
-                    $n->mid->right->c != $n->c
-                )
-            {
-                $this->find($n->mid->right, $key, $pos+1, $c);
-            
-            } else if (is_object($n->right)) 
-            {                               
-                $pos=$this->find($n->right, $key, $pos, $c);
-                
-            }   else if (is_object($n->fail) && $n->fail->c!=0 && $n->fail->c!=$n->c)
-            {
-                $pos=$this->find($n->fail, $key, $pos+1, $c); 
-            
-            }
-        } else 
-        {
-            if ($pos+1==strlen($key) && $n->is_leaf==false)
-            {
-                if (is_object($n->fail) && $n->fail->is_leaf==false && $n->fail->c!=$n->c)
+            case (ord($key[$pos]) < ord($n->char)):
+                if (is_object($n->mid->left) &&
+                    $n->mid->left->char==$next &&
+                            $n->char==$prev &&
+                       $n->mid->left->c!=$n->c
+                    )
                 {
-                    $this->fail($n->fail,$pos, $c);
+                    $this->find($n->mid->left, $key, $len, $pos+1, $c);
+                
+                } else if (is_object($n->left)) 
+                {
+                    $pos=$this->find($n->left, $key, $len, $pos, $c);
                     
-                } else if (is_object($n->fail->pid) && $n->fail->pid->c!=$n->c)
+                } else if (is_object($n->fail) && $ishead && $iscopy)
                 {
-                    $this->fail($n->fail->pid,$pos, $c);
-                }
-                else if (is_object($n->pid->fail) &&
-                    $n->pid->fail->c!=0 &&
-                        $n->pid->fail->c!=$n->c)
-                {
-                    $this->fail($n->pid->fail,$pos, $c);
-                }
-                $this->result[$pos.$n->c]=$n->word->get();
-                return $pos;
-            
-            } else if ($n->is_leaf==false && $n!= $this->head)
-            {
-                if (is_object($n->mid) &&
-                    $n->mid->char==substr($key,$pos+1,1)) 
-                {
-                    $posm=$this->find($n->mid, $key, $pos+1, $c);
-                }
-                if (is_object($n->fail) && $n->fail->c!=0 &&
-                    $n->fail->c!=$n->c &&
-                        $n->fail->mid->char!=substr($key,$pos+1,1)
-                    )
-                {
-                    $pos=$this->find($n->fail, $key, $pos+1, $c);    
-                
-                } else if (is_object($n->fail->mid) &&
-                    $n->fail->mid->char==substr($key,$pos+1,1) &&
-                        $n->fail->mid->c != $n->c
-                    )
-                {
-                    $this->find($n->fail->mid, $key, $pos+1);
-                    
-                } else if (is_object($n->fail->mid->right) &&
-                    $n->fail->mid->right->char==substr($key,$pos+1,1) &&
-                        $n->fail->mid->right->c != $n->c
-                    )
-                {
-                    $this->find($n->fail->mid->right, $key, $pos+1, $c);
-                
-                } else if (is_object($n->fail->mid->left) &&
-                    $n->fail->mid->left->char==substr($key,$pos+1,1) &&
-                        $n->fail->mid->left->c != $n->c
-                    )
-                {
-                    $this->find($n->fail->mid->left, $key, $pos+1, $c);
-                }
-                
-                if ($n->fail->is_leaf==false && $n->fail->c!=$n->c && ($pos+2)<strlen($key))
-                {
-                    $this->fail($n->fail,$pos);
-                } else if (is_object($n->fail->pid) && $n->fail->pid->c!=$n->c)
-                {
-                    $this->fail($n->fail->pid,$pos);
-                }
-                //else if (is_object($n->pid->fail) &&
-                //    $n->pid->fail!=$this->head &&
-                //        $n->pid->fail->c!=$n->c)
-                //{
-                //    $this->fail($n->pid->fail,$pos);
-                //}
-                
-                $this->result[$pos.$n->c]=$n->word->get();
-                return $pos;
-            
-            } else if ($n->is_leaf==true || $n==$this->head) 
-            {
-                if (is_object($n->mid) &&
-                    $n->mid->char==substr($key,$pos+1,1)) 
-                {
-                    $pos=$this->find($n->mid, $key, $pos+1, $c);
-                    
-                } else if (is_object($n->mid->right) &&
-                    $n->mid->right->char==substr($key,$pos+1,1) &&
+                    $pos=$this->find($n->fail, $key, $len, $pos+1, $c); 
+                } 
+            break;
+            case (ord($key[$pos]) > ord($n->char)):
+                if (is_object($n->mid->right) &&
+                    $n->mid->right->char==$next &&
+                       $n->char==$prev && 
                         $n->mid->right->c != $n->c
                     )
                 {
-                    $this->find($n->mid->right, $key, $pos+1, $c);
+                    $this->find($n->mid->right, $key, $len, $pos+1, $c);
                 
-                } else if (is_object($n->mid->left) &&
-                    $n->mid->left->char==substr($key,$pos+1,1) &&
-                        $n->mid->left->c != $n->c
-                    )
+                } else if (is_object($n->right)) 
+                {                               
+                    $pos=$this->find($n->right, $key, $len, $pos, $c);
+                    
+                }   else if (is_object($n->fail) && $ishead && $iscopy)
                 {
-                    $this->find($n->mid->left, $key, $pos+1, $c);
-                } else if ($n->fail->c!=0)
+                    $pos=$this->find($n->fail, $key, $len, $pos+1, $c); 
+                }    
+            break;
+            default:
+                switch (true)
                 {
-                    $this->find($n->fail, $key, $pos+1, $c);  
-                } 
-            } 
+                    case ($pos+1==$len && $n->is_leaf==false):
+                    {
+                        if (is_object($n->fail) &&
+                                $n->fail->is_leaf==false && $iscopy)
+                        {
+                            $this->fail($n->fail, $pos, $c);
+                            
+                        } else if (is_object($n->fail->pid) && $n->fail->pid->c!=$n->c)
+                        {
+                            $this->fail($n->fail->pid,$pos, $c);
+                        } else if (is_object($n->pid->fail) &&
+                            $n->pid->fail->c!=0 &&
+                                $n->pid->fail->c!=$n->c)
+                        {
+                            $this->fail($n->pid->fail,$pos, $c);
+                        }
+                        $this->result[$pos.":".$n->c]=$n->word->get();
+                    }
+                    break;    
+            
+                    case ($n->is_leaf==false && $n!= $this->head):
+                    {
+                        if (is_object($n->mid) &&
+                            $n->mid->char==$next) 
+                        {
+                            $posm=$this->find($n->mid, $key, $len, $pos+1, $c);
+                        }
+                        if (is_object($n->fail) && $ishead && $iscopy &&
+                                $n->fail->mid->char!=$next
+                            )
+                        {
+                            $pos=$this->find($n->fail, $key, $len, $pos+1, $c);    
+                        
+                        } else if (is_object($n->fail->mid) &&
+                            $n->fail->mid->char==$next &&
+                                $n->fail->mid->c!=$n->c
+                            )
+                        {
+                            $this->find($n->fail->mid, $key, $len, $pos+1, $c);
+                            
+                        } else if (is_object($n->fail->mid->right) &&
+                            $n->fail->mid->right->char==$next &&
+                                $n->fail->mid->right->c!=$n->c
+                            )
+                        {
+                            $this->find($n->fail->mid->right, $key, $len, $pos+1, $c);
+                        
+                        } else if (is_object($n->fail->mid->left) &&
+                            $n->fail->mid->left->char==$next &&
+                                $n->fail->mid->left->c!=$n->c
+                            )
+                        {
+                            $this->find($n->fail->mid->left, $key, $len, $pos+1, $c);
+                        }
+                        
+                        if ($n->fail->is_leaf==false && $iscopy && ($pos+2)<$len)
+                        {
+                            $this->fail($n->fail,$pos);
+                        } else if (is_object($n->fail->pid)
+                                   && $n->fail->pid->c!=$n->c)
+                        {
+                            $this->fail($n->fail->pid,$pos);
+                        }
+                        $this->result[$pos.":".$n->c]=$n->word->get();
+                    }
+                    break;
+                    case ($n->is_leaf==true || $n==$this->head): 
+                    {
+                        if (is_object($n->mid) && $n->mid->char==$next) 
+                        {
+                            $pos=$this->find($n->mid, $key, $len, $pos+1, $c);
+                            
+                        } else if (is_object($n->mid->right) &&
+                            $n->mid->right->char==$next &&
+                                $n->mid->right->c!=$n->c
+                            )
+                        {
+                            $this->find($n->mid->right, $key, $len, $pos+1, $c);
+                        
+                        } else if (is_object($n->mid->left) &&
+                            $n->mid->left->char==$next &&
+                                $n->mid->left->c!=$n->c
+                            )
+                        {
+                            $this->find($n->mid->left, $key, $len, $pos+1, $c);
+                        } else if ($ishead)
+                        {
+                            $this->find($n->fail, $key, $len, $pos+1, $c);  
+                        }
+                    }
+                break;   
+                }
+            break;
         }
         return $pos;
     }
@@ -311,9 +312,9 @@ class Ahocorasick extends Trie
         $this->queue=$this->result=array();
     }
     
-    public function add ( $key )
+    public function add($key)
     {
-        $c=$this->insert ( $this->head, new Payload ($key), START_CHAR_COUNT,0,$this->c );        
+        $c=$this->insert($this->head, new Payload($key), START_CHAR_COUNT,0,$this->c);        
         $this->c=$c;
     }
     
@@ -360,33 +361,39 @@ class Ahocorasick extends Trie
                     {
                         $pid=$this->head;                
                     }
-                    if ($fail->char==$pid->char)
+                    
+                    switch ($fail->char)
                     {
-                        $fail->fail=$pid->mid;    
-                    } else if ($fail->char==$pid->left->char)
-                    {
-                        $fail->fail=$pid->left;
-                    }  else if ($fail->char==$pid->right->char)
-                    {
-                        $fail->fail=$pid->right;
-                    } else if ($fail->char==$pid->left->left->char)
-                    {
-                        $fail->fail=$pid->left->left;
-                    } else if ($fail->char==$pid->left->mid->char)
-                    {
-                        $fail->fail=$pid->left->mid;
-                    } else if ($fail->char==$pid->left->right->char)
-                    {
-                        $fail->fail=$pid->left->right;
-                    }else if ($fail->char==$pid->right->left->char)
-                    {
-                        $fail->fail=$pid->right->left;
-                    } else if ($fail->char==$pid->right->mid->char)
-                    {
-                        $fail->fail=$pid->right->mid;
-                    }  else if ($fail->char==$pid->right->right->char)
-                    {
-                        $fail->fail=$pid->right->right;
+                        case $pid->char:
+                            $fail->fail=$pid->mid;      
+                        break;
+                        case $pid->left->char:
+                            $fail->fail=$pid->left;
+                        break;
+                        case $pid->right->char:
+                            $fail->fail=$pid->right;
+                        break;
+                        case $pid->left->left->char:
+                            $fail->fail=$pid->left->left;
+                        break;
+                        case $pid->left->mid->char:
+                            $fail->fail=$pid->left->mid;
+                        break;
+                        case $pid->left->right->char:
+                            $fail->fail=$pid->left->right;
+                        break;
+                        case $pid->right->left->char:
+                            $fail->fail=$pid->right->left;
+                        break;
+                        case $pid->right->left->char:
+                            $fail->fail=$pid->right->left;
+                        break;
+                        case $pid->right->mid->char:
+                            $fail->fail=$pid->right->mid;
+                        break;
+                        case $pid->right->right->char:
+                            $fail->fail=$pid->right->right;
+                        break;
                     }
                 }
             }
@@ -398,12 +405,11 @@ class Ahocorasick extends Trie
        $this->head->fail=0;
        $this->makefail();
        
-        for ($i=0;$i<strlen($key);$i++) 
+        for ($i=0,$len=strlen($key);$i<$len;$i++) 
         {
-            $pos=$this->find($this->head, $key , $i, $tmp);
-            $tmp=$pos;
-            if ($tmp==$i) $tmp++;
-            $i=($tmp-1);
+            $char=$this->find($this->head, $key ,strlen($key), $i, $char);
+            if ($char==$i) $char++;
+            $i=($char-1);
         }
        
        return implode(",",$this->result);
