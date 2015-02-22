@@ -42,41 +42,41 @@ class Trie {
                 if (is_object($cur->mid) && !is_object($cur->mid->fail)) {
                     $cur->mid->fail=$this->head;
                 }
-                $a=$b=$c=false;
+
                 if ($cur->left && !$visited[$cur->left->c]) {
-                    $a=$visited[$cur->left->c]=true;
+                    $visited[$cur->left->c]=true;
                     array_push($this->queue,$cur->left);
                 }
                 if ($cur->mid && !$visited[$cur->mid->c]) {
-                    $a=$visited[$cur->mid->c]=true;
+                    $visited[$cur->mid->c]=true;
                     array_push($this->queue,$cur->mid);
                 }
                 if ($cur->right && !$visited[$cur->right->c]) {
-                    $a=$visited[$cur->right->c]=true;
+                    $visited[$cur->right->c]=true;
                     array_push($this->queue,$cur->right);
                 }
                 if ($arr2->left && !$visited[$arr2->left->c]) {
-                    $b=$visited[$arr2->left->c]=true;
+                    $visited[$arr2->left->c]=true;
                     array_push($this->queue,$arr2->left);
                 }
                 if ($arr2->mid && !$visited[$arr2->mid->c]) {
-                    $b=$visited[$arr2->mid->c]=true;
+                    $visited[$arr2->mid->c]=true;
                     array_push($this->queue,$arr2->mid);
                 }
                 if ($arr2->right && !$visited[$arr2->right->c]) {
-                    $b=$visited[$arr2->right->c]=true;
+                    $visited[$arr2->right->c]=true;
                     array_push($this->queue,$arr2->right);
                 }
                 if ($arr3->left && !$visited[$arr3->left->c]) {
-                    $c=$visited[$arr3->left->c]=true;
+                    $visited[$arr3->left->c]=true;
                     array_push($this->queue,$arr3->left);
                 }
                 if ($arr3->mid && !$visited[$arr3->mid->c]) {
-                    $c=$visited[$arr3->mid->c]=true;
+                    $visited[$arr3->mid->c]=true;
                     array_push($this->queue,$arr3->mid);
                 }
                 if ($arr3->right && !$visited[$arr3->right->c]) {
-                    $c=$visited[$arr3->right->c]=true;
+                    $visited[$arr3->right->c]=true;
                     array_push($this->queue,$arr3->right);
                 }   
                 
@@ -114,8 +114,7 @@ class Trie {
                 if ($cur->right) {
                     $cur->right->fail=$this->head;
                     array_push($this->queue,$cur->right);
-                }
-                if ($cur->fail==null && $cur!=$this->head) $cur->fail=$this->head;    
+                }    
             }
         }
     }
@@ -481,7 +480,8 @@ class Ahocorasick extends Trie
                                 $p=0;
                                 $s=$e;  
                             }
-                            $p=($e+$delta-strlen($v2))-$p+$c;
+                            $p=($e+$c+strlen($v2))-$p-$delta;
+                            if ($p<0) $p=0;
                             if ($g[$p]==false)
                             {
                                 $g[$p]=true;
@@ -489,7 +489,6 @@ class Ahocorasick extends Trie
                             {
                                 $p=$e-1;
                             }
-                            if ($p<0) $p=0;
                             $c++;
                         } else
                         {
@@ -499,7 +498,7 @@ class Ahocorasick extends Trie
                     if ($e!==false)
                     {
                         $b[]=substr($key,$s,$e-$s+strlen($v2));
-                        //$p=$delta;
+                        $p=$delta;
                     }
                 }
             }
