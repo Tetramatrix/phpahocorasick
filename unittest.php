@@ -10,7 +10,7 @@ class unittest extends PHPUnit_Framework_TestCase
 {   
   public function testexample1()
   {
-    $tree = new  Ahocorasick\Ahocorasick();
+    $tree = new Ahocorasick\Ahocorasick();
     $tree->add ("a");
     $tree->add ("ab");
     $tree->add ("bab");
@@ -19,7 +19,7 @@ class unittest extends PHPUnit_Framework_TestCase
     $tree->add ("c");
     $tree->add ("caa");
     echo $tree->match ("abccab");
-    $this->expectOutputString("a,ab,c,bc,c,a,ab"); 
+    $this->expectOutputString("a,ab,bc,c,c,a,ab"); 
   }
   
   public function testexample2()
@@ -63,7 +63,7 @@ class unittest extends PHPUnit_Framework_TestCase
     $tree->add("so");
     $tree->add("take");
     echo $tree->match("takesofasofastfassofatakesossosofastakeso");
-    $this->expectOutputString("take,so,sofa,so,fast,sofa,so,sofa,fast,take,so,so,so,fast,sofa,take,so");
+    $this->expectOutputString("take,so,sofa,so,sofa,fast,so,sofa,take,so,so,so,sofa,fast,take,so");
   }
   
   public function testexample6()
@@ -84,7 +84,7 @@ class unittest extends PHPUnit_Framework_TestCase
     $tree->add("hit");
     $tree->add("chip");
     echo $tree->match("microchips");
-    $this->expectOutputString("hi,hips,hip,chip");
+    $this->expectOutputString("hi,hip,chip,hips");
   }
   
   public function testexample8()
@@ -96,7 +96,7 @@ class unittest extends PHPUnit_Framework_TestCase
     $tree->add("d");
     $tree->add("abcde");
     echo $tree->match("xbabcdex");
-    $this->expectOutputString("ab,bc,d,ab,bab,abcde");
+    $this->expectOutputString("ab,bab,bc,d,abcde");
   }
   
   public function testexample9()

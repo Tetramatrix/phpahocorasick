@@ -19,82 +19,103 @@ class Trie {
     
     public function makefailure()
     {
+        $visited=array();
         $this->queue[]=$this->head;
-        $this->queue[]=$this->head;
-        $this->queue[]=$this->head;
+        $visited[$this->head->c]=true;
         
-        while (count($this->queue)>=3)
+        while (count($this->queue)>0 && count($visited)!=$this->head->c)
         {
-            for ($i=0;$i<3;$i++)
+            $cur=array_shift($this->queue);    
+            list($arr2,$arr3)=$this->queue;
+            
+            if ($cur->pid->fail || $cur->pid)
             {
-                $fail=array_shift($this->queue);    
-      
-                if ($fail->left)
-                {
-                    array_unshift($this->queue,$fail->left);
+                if (!is_object($cur->fail)) {
+                    $cur->fail=$this->head;
                 }
-                
-                if ($fail->mid)
-                {
-                    array_unshift($this->queue,$fail->mid);
+                if (is_object($cur->right) && !is_object($cur->right->fail)) {
+                    $cur->right->fail=$this->head;
                 }
-                
-                if ($fail->right)
-                {
-                    array_unshift($this->queue,$fail->right);
+                if (is_object($cur->left) && !is_object($cur->left->fail)) {
+                    $cur->left->fail=$this->head;
                 }
-                
-                if ($fail->fail==null && $fail!=$this->head)
-                {
-                    $fail->fail=$this->head;
+                if (is_object($cur->mid) && !is_object($cur->mid->fail)) {
+                    $cur->mid->fail=$this->head;
                 }
+                $a=$b=$c=false;
+                if ($cur->left && !$visited[$cur->left->c]) {
+                    $a=$visited[$cur->left->c]=true;
+                    array_push($this->queue,$cur->left);
+                }
+                if ($cur->mid && !$visited[$cur->mid->c]) {
+                    $a=$visited[$cur->mid->c]=true;
+                    array_push($this->queue,$cur->mid);
+                }
+                if ($cur->right && !$visited[$cur->right->c]) {
+                    $a=$visited[$cur->right->c]=true;
+                    array_push($this->queue,$cur->right);
+                }
+                if ($arr2->left && !$visited[$arr2->left->c]) {
+                    $b=$visited[$arr2->left->c]=true;
+                    array_push($this->queue,$arr2->left);
+                }
+                if ($arr2->mid && !$visited[$arr2->mid->c]) {
+                    $b=$visited[$arr2->mid->c]=true;
+                    array_push($this->queue,$arr2->mid);
+                }
+                if ($arr2->right && !$visited[$arr2->right->c]) {
+                    $b=$visited[$arr2->right->c]=true;
+                    array_push($this->queue,$arr2->right);
+                }
+                if ($arr3->left && !$visited[$arr3->left->c]) {
+                    $c=$visited[$arr3->left->c]=true;
+                    array_push($this->queue,$arr3->left);
+                }
+                if ($arr3->mid && !$visited[$arr3->mid->c]) {
+                    $c=$visited[$arr3->mid->c]=true;
+                    array_push($this->queue,$arr3->mid);
+                }
+                if ($arr3->right && !$visited[$arr3->right->c]) {
+                    $c=$visited[$arr3->right->c]=true;
+                    array_push($this->queue,$arr3->right);
+                }   
                 
-                if ($fail->pid->fail)
+                $a=false;
+                foreach (array_reverse($this->queue) as $k=>$v)
                 {
-                    $pid=$fail->pid->fail;
-                    while ($fail->char!=$pid->char && $pid!=$this->head && $pid!=null)
-                    {
-                        $pid=$pid->pid->fail;
+                    if ($cur->char==$v->char && $cur->c!=$v->c)
+                    {    
+                        if ($cur->pid->char==$v->pid->char || $v->c==0)
+                        {
+                            if (is_object($v->fail) && $v->fail->c==0) {
+                                $cur->fail=$v;
+                                $a=true;
+                            } else if (!is_object($v->fail)) {
+                                $cur->fail=$v;
+                                $a=true;
+                            }
+                        }
                     }
-                    if ($pid==0)
-                    {
-                        $pid=$this->head;                
-                    }
-                    
-                    switch ($fail->char)
-                    {
-                        case $pid->char:
-                            $fail->fail=$pid->mid;      
-                        break;
-                        case $pid->left->char:
-                            $fail->fail=$pid->left;
-                        break;
-                        case $pid->right->char:
-                            $fail->fail=$pid->right;
-                        break;
-                        case $pid->left->left->char:
-                            $fail->fail=$pid->left->left;
-                        break;
-                        case $pid->left->mid->char:
-                            $fail->fail=$pid->left->mid;
-                        break;
-                        case $pid->left->right->char:
-                            $fail->fail=$pid->left->right;
-                        break;
-                        case $pid->right->left->char:
-                            $fail->fail=$pid->right->left;
-                        break;
-                        case $pid->right->left->char:
-                            $fail->fail=$pid->right->left;
-                        break;
-                        case $pid->right->mid->char:
-                            $fail->fail=$pid->right->mid;
-                        break;
-                        case $pid->right->right->char:
-                            $fail->fail=$pid->right->right;
-                        break;
-                    }
                 }
+                if ($a==false) {
+                    $cur->fail=$this->head;
+                }
+                
+            } else
+            {
+                if ($cur->left) {
+                    $cur->left->fail=$this->head;
+                    array_push($this->queue,$cur->left);
+                }
+                if ($cur->mid){
+                    $cur->mid->fail=$this->head;
+                    array_push($this->queue,$cur->mid);
+                }
+                if ($cur->right) {
+                    $cur->right->fail=$this->head;
+                    array_push($this->queue,$cur->right);
+                }
+                if ($cur->fail==null && $cur!=$this->head) $cur->fail=$this->head;    
             }
         }
     }
@@ -160,22 +181,6 @@ class Trie {
         }
         return $c;     
     }
-
-    //////////////////////////////////////////////////////////////////////////
-    function dictsuffix (&$n, $pos)
-    {
-        if (!is_object($n)) 
-            return EMPTY_NODE;
-        
-        if ($n->is_leaf==false)
-        {
-            $this->result[$pos][$n->c]=$n->word->get();
-        }
-        if ($n->pid->is_leaf==false && $n->pid->c!=0 && $n->pid->c!=$n->c)
-        {
-            $n=$this->dictsuffix($n->pid,$pos);
-        }
-    }
  
     //////////////////////////////////////////////////////////////////////////
     function find (&$n, $key, $len, $pos=START_CHAR_COUNT, $c=0)
@@ -209,7 +214,7 @@ class Trie {
                         $pos=$this->find($n->left, $key, $len, $pos, $c);
                     }
                     break;
-                    case (is_object($n->fail) && $ishead && $iscopy):
+                    case (is_object($n->fail) && $ishead && $iscopy && $n->fail->pic->char==$prev):
                     {
                         $pos=$this->find($n->fail, $key, $len, $pos+1, $c); 
                     } 
@@ -234,7 +239,7 @@ class Trie {
                         $pos=$this->find($n->right, $key, $len, $pos, $c);
                     }
                     break;
-                    case (is_object($n->fail) && $ishead && $iscopy) :
+                    case (is_object($n->fail) && $ishead && $iscopy && $n->fail->pic->char==$prev) :
                     {
                         $pos=$this->find($n->fail, $key, $len, $pos+1, $c); 
                     }
@@ -246,72 +251,30 @@ class Trie {
                 {
                     case ($pos+1==$len && $n->is_leaf==false):
                     {
-                        if (is_object($n->fail) &&
-                                $n->fail->is_leaf==false && $iscopy)
-                        {
-                            $this->dictsuffix($n->fail, $pos, $c);
-                            
-                        } else if (is_object($n->fail->pid) && $isfailpid)
-                        {
-                            $this->dictsuffix($n->fail->pid,$pos, $c);
-                       
-                        } else if (is_object($n->pid->fail) &&
-                            $n->pid->fail->c!=0 &&
-                                $n->pid->fail->c!=$n->c)
-                        {
-                            $this->dictsuffix($n->pid->fail,$pos, $c);
-                        }
                         $this->result[$pos][$n->c]=$n->word->get();
                     }
                     break;    
-                    case ($n->is_leaf==false && $n!= $this->head):
+                    case ($n->is_leaf==false && ($n!= $this->head || is_object($n->word))):
                     {
                         if (is_object($n->mid) &&
                             $n->mid->char==$next) 
                         {
-                            $posm=$this->find($n->mid, $key, $len, $pos+1, $c);
-                        }
-                        if (is_object($n->fail) && $ishead && $iscopy &&
-                                $n->fail->mid->char!=$next
-                            )
-                        {
-                            $pos=$this->find($n->fail, $key, $len, $pos+1, $c);    
-                        
-                        } else if (is_object($n->fail->mid) &&
-                            $n->fail->mid->char==$next &&
-                                $n->fail->mid->c!=$n->c
-                            )
-                        {
-                            $this->find($n->fail->mid, $key, $len, $pos+1, $c);
-                            
-                        } else if (is_object($n->fail->mid->right) &&
-                            $n->fail->mid->right->char==$next &&
-                                $n->fail->mid->right->c!=$n->c
-                            )
-                        {
-                            $this->find($n->fail->mid->right, $key, $len, $pos+1, $c);
-                        
-                        } else if (is_object($n->fail->mid->left) &&
-                            $n->fail->mid->left->char==$next &&
-                                $n->fail->mid->left->c!=$n->c
-                            )
-                        {
-                            $this->find($n->fail->mid->left, $key, $len, $pos+1, $c);
+                            $this->find($n->mid, $key, $len, $pos+1, $c);
                         }
                         
-                        if ($n->fail->is_leaf==false && $iscopy && ($pos+2)<$len)
-                        {
-                            $this->dictsuffix($n->fail,$pos);
-                            
-                        } else if (is_object($n->fail->pid) && $isfailpid)
-                        {
-                            $this->dictsuffix($n->fail->pid,$pos);
-                        }
                         $this->result[$pos][$n->c]=$n->word->get();
+                        
                     }
                     break;
                     case ($n->is_leaf==true || $n==$this->head): 
                     {
+                        if (is_object($n->fail->mid) &&
+                            $n->fail->mid->char==$next &&
+                                $n->fail->mid->c!=$n->c && $n->fail->char==$n->char
+                            )
+                        {
+                            $this->find($n->fail->mid, $key, $len, $pos+1, $c);
+                        }
                         if (is_object($n->mid) && $n->mid->char==$next) 
                         {
                             $pos=$this->find($n->mid, $key, $len, $pos+1, $c);
@@ -329,9 +292,6 @@ class Trie {
                             )
                         {
                             $this->find($n->mid->left, $key, $len, $pos+1, $c);
-                        } else if ($ishead)
-                        {
-                            $this->find($n->fail, $key, $len, $pos+1, $c);  
                         }
                     }
                 break;   
@@ -404,17 +364,30 @@ class Ahocorasick extends Trie
     {
         $this->queue=$this->result=array();
     }
-    
+     
     public function add($key)
     {
         $str=new Payload($key);
         $c=$this->insert($this->head, $str,strlen($str->payload),START_CHAR_COUNT,0,$this->c);        
+        if ($this->c==$c) $c+=strlen($str->payload);
         $this->c=$c;
     }
     
-    public function match($key)
+    public function match($key,$wildcard=null)
     {
-        $this->head->fail=0;
+        if ($wildcard)
+        {
+            $arr=explode("*",$wildcard);
+            foreach (array_reverse($arr) as $value)
+            {
+                $str=new Payload($value);
+                $c=$this->insert($this->head, $str,strlen($str->payload),START_CHAR_COUNT,0,$this->c);
+                if ($this->c==$c) $c+=strlen($str->payload);
+                $this->c=$c;
+            }        
+        }
+        
+        $this->head->fail=0;    
         $this->makefailure();
        
         for ($i=0,$len=strlen($key);$i<$len;$i++) 
@@ -424,13 +397,115 @@ class Ahocorasick extends Trie
             $i=($char-1);
         }
         ksort($this->result);
-        foreach ($this->result as $k1=>$v1) {
+        foreach ($this->result as $k1=>$v1)
+        {
             ksort($v1);
-            foreach ($v1 as $k2=>$v2) {
+            foreach ($v1 as $k2=>$v2)
+            {
                 $tmp[]=$v2;
             }
         }
-        return implode(",",$tmp);
+        
+        if ($wildcard)
+        {
+            $a=array();
+            $e=count($tmp);
+            $d=count($arr);
+            $x=0;
+            
+            foreach ($tmp as $v1)
+            {
+                $z=$x;
+                $c=0;
+                $v=$b=array();
+
+                for($i=$z;$i<$e;$i++)
+                {
+                    if ($d==$c && $i==$e)
+                    {
+                        break;
+                    } else if ($d==$c && $tmp[$i-1]==$arr[$c-1])
+                    {
+                        $v[$i-1]=true;
+                        $a[$x][$i]=implode(",",$b);
+                        $c--;
+                    } else if ($d==$c)
+                    {
+                        $v[$i-1]=true;
+                        $c--;
+                    }
+                    if ($tmp[$i]==$arr[$c] && $v[$i]!=true)
+                    {
+                        if ($c==0) $z=$x=$i;
+                        $c++;
+                        $b[$i]=$tmp[$i];
+                    } else if ($c>0)
+                    {
+                        $b[$i]=$tmp[$i];
+                    } 
+                }
+                if ($d==$c)
+                {
+                    $v[$i-1]=true;
+                    //$a[$x][$i]="[".implode(",",$b)."]";
+                    $a[$x][$i]=implode(",",$b);
+                    $b=array();
+                    $c=0;
+                    $z=$x;
+                } 
+                $x++;
+            }
+        }
+        
+        if ($wildcard)
+        {
+            $beta=explode("*",$wildcard);          
+            $x=$s=$p=0;
+            foreach ($a as $k => $v)
+            {
+                $delta=$p=$k*strlen($beta[0]);
+                foreach ($v as $ki => $vi)
+                {
+                    $g=array();
+                    $e=$c=0;
+                    $l=explode(",",$vi);
+                    //$p=$k;
+                    foreach ($l as $k2 => $v2)
+                    {
+                        if ($p<strlen($key))
+                        {
+                            $e=strpos($key,$v2,$p);
+                            if ($e===false) break;
+                            if ($c==0)
+                            {
+                                $p=0;
+                                $s=$e;  
+                            }
+                            $p=($e+$delta-strlen($v2))-$p+$c;
+                            if ($g[$p]==false)
+                            {
+                                $g[$p]=true;
+                            } else
+                            {
+                                $p=$e-1;
+                            }
+                            if ($p<0) $p=0;
+                            $c++;
+                        } else
+                        {
+                            $e=false;
+                        }
+                    }
+                    if ($e!==false)
+                    {
+                        $b[]=substr($key,$s,$e-$s+strlen($v2));
+                        //$p=$delta;
+                    }
+                }
+            }
+        }
+        
+        return implode(",",$wildcard==null ? $tmp : $b);
     }
 }
 ?>
