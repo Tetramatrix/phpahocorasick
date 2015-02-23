@@ -51,7 +51,12 @@ require_once ("ahocorasick.php");
 
 //$tree = new Ahocorasick\Ahocorasick();
 //$tree->add("fast");
+//$tree->add("sofa");//$tree = new Ahocorasick\Ahocorasick();
+//$tree->add("fast");
 //$tree->add("sofa");
+//$tree->add("so");
+//$tree->add("take");
+//echo $tree->match("takesofasofastfassofatakesossosofastakeso");
 //$tree->add("so");
 //$tree->add("take");
 //echo $tree->match("takesofasofastfassofatakesossosofastakeso");
@@ -99,7 +104,7 @@ require_once ("ahocorasick.php");
 //$tree->add("saturn");
 //$tree->add("uranus");
 //$tree->add("pluto");
-//echo $tree->match("XXearthXXvenusaturnXXmarsaturn");
+//echo $tree->match("XXearthXXvenusaturnXXmarsaturn","ea*turn");
 
 //$tree = new Ahocorasick\Ahocorasick();
 //$tree->add("say");
@@ -113,6 +118,7 @@ $tree = new Ahocorasick\Ahocorasick();
 $tree->add("AC");
 $tree->add("GTG");
 $tree->add("AACT");
-echo $tree->match("ACCGAGTGCGTGGACAAACTACGATTGTGGAATGAACT");
+//////echo $tree->match("ACCGAGTGCGTGGACAAACTACGATTGTGGAATGAACT");
+echo $tree->match("ACCGAGTGCGTGGACAAACTACGATTGTGGAATGAACT","AC*GT");
 
 ?>

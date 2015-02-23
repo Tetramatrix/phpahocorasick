@@ -149,5 +149,29 @@ class unittest extends PHPUnit_Framework_TestCase
     echo $tree->match("ACCGAGTGCGTGGACAAACTACGATTGTGGAATGAACT");
     $this->expectOutputString("AC,GTG,GTG,AC,AC,AACT,AC,GTG,AC,AACT");
   }
+  public function testexample13()
+  {
+    $tree = new Ahocorasick\Ahocorasick();
+    $tree->add("mercury");
+    $tree->add("venus");
+    $tree->add("earth");
+    $tree->add("mars");
+    $tree->add("jupiter");
+    $tree->add("saturn");
+    $tree->add("uranus");
+    $tree->add("pluto");
+    echo $tree->match("XXearthXXvenusaturnXXmarsaturn","ea*turn");
+    $this->expectOutputString("earthXXvenusaturn,earthXXvenusaturnXXmarsaturn");
+  }
+  
+  public function testexample14()
+  {
+    $tree = new Ahocorasick\Ahocorasick();
+    $tree->add("AC");
+    $tree->add("GTG");
+    $tree->add("AACT");
+    echo $tree->match("ACCGAGTGCGTGGACAAACTACGATTGTGGAATGAACT","AC*GT");
+    $this->expectOutputString("ACCGAGT,ACCGAGTGCGT,ACCGAGTGCGTGGACAAACTACGATTGT,ACAAACTACGATTGT,ACTACGATTGT,ACGATTGT");
+  }
 }
 ?>

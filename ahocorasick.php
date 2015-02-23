@@ -363,9 +363,10 @@ class Ahocorasick extends Trie
     {
         $this->queue=$this->result=array();
     }
-     
+    
     public function add($key)
     {
+        $this->keywords[]=$key;
         $str=new Payload($key);
         $c=$this->insert($this->head, $str,strlen($str->payload),START_CHAR_COUNT,0,$this->c);        
         if ($this->c==$c) $c+=strlen($str->payload);
@@ -457,50 +458,39 @@ class Ahocorasick extends Trie
         }
         
         if ($wildcard)
-        {
-            $beta=explode("*",$wildcard);          
-            $x=$s=$p=0;
-            foreach ($a as $k => $v)
-            {
-                $delta=$p=$k*strlen($beta[0]);
-                foreach ($v as $ki => $vi)
-                {
-                    $g=array();
-                    $e=$c=0;
-                    $l=explode(",",$vi);
-                    //$p=$k;
-                    foreach ($l as $k2 => $v2)
-                    {
-                        if ($p<strlen($key))
-                        {
-                            $e=strpos($key,$v2,$p);
-                            if ($e===false) break;
-                            if ($c==0)
-                            {
-                                $p=0;
-                                $s=$e;  
-                            }
-                            $p=($e+$c+strlen($v2))-$p-$delta;
-                            if ($p<0) $p=0;
-                            if ($g[$p]==false)
-                            {
-                                $g[$p]=true;
-                            } else
-                            {
-                                $p=$e-1;
-                            }
-                            $c++;
-                        } else
-                        {
-                            $e=false;
-                        }
-                    }
-                    if ($e!==false)
-                    {
-                        $b[]=substr($key,$s,$e-$s+strlen($v2));
-                        $p=$delta;
-                    }
+        {   
+            $needle=explode("*",$wildcard);
+            foreach ($needle as $k=>$v) {
+                foreach ($this->keywords as $k1=>$v1) {
+                    if ($v==$v1) unset($needle[$k]);
                 }
+            }
+            $needle=array_values($needle);
+            $c=$needle[0];
+            foreach ($needle as $k=>$v) {
+                $needle[$k]=",$v,";
+            }
+            $needle[]="$c,";
+            foreach ($a as $k1=>$v1) {
+                foreach ($v1 as $k2=>$haystack) {
+                    $a[$k1][$k2]=str_replace(",,",",",str_replace($needle,",",$haystack));
+                }
+            }
+            $v=array();
+            foreach ($a as $k1=>$v1) {
+                foreach ($v1 as $k2=>$haystack) {
+                    $c=explode(",",$haystack);
+                    $e=end($c);
+                    $start=strpos($key,$arr[0],$k1*strlen($arr[0]));
+                    $p=$k1;
+                    while (!empty($v[$start])) {
+                        $p++;
+                        $start=strpos($key,$arr[0],$p*strlen($arr[0]));
+                    }
+                    $len=strpos($key,$e,$k2*strlen($arr[0]))+strlen($e)-$start;
+                    $b[]=substr($key,$start,$len);       
+                }
+                $v[$start]=true;
             }
         }
         
