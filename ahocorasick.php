@@ -22,11 +22,45 @@ class Trie {
         $visited=array();
         $this->queue[]=$this->head;
         $visited[$this->head->c]=true;
+        $x=0;
         
         while (count($this->queue)>0 && count($visited)!=$this->head->c)
         {
-            $cur=array_shift($this->queue);    
-            list($arr2,$arr3)=$this->queue;
+            //$cur=array_shift($this->queue);    
+            list($cur,$arr2,$arr3)=$this->queue;
+     
+            switch($x) {
+                case 0:
+                    ++$x;                   
+                break;
+                case 1:
+                    if (!empty($arr2)) {
+                        //$swap=$cur;
+                        //$cur=$arr2;
+                        //$arr2=$arr3;
+                        //$arr3=$swap;
+                        list($a,$a,$a,$arr3)=$this->queue;
+                        ++$x;
+                    } else {
+                        $nil=array_shift($this->queue);
+                        $x=0;
+                    }
+                break;
+                case 2;
+                    if (!empty($arr3)) {
+                        //$swap=$cur;
+                        //$cur=$arr3;
+                        //$arr3=$swap;
+                        list($a,$a,$a,$a,$arr3)=$this->queue;
+                        $nil=array_shift($this->queue);
+                        $x=0;
+                    } else {
+                        $nil=array_shift($this->queue);
+                        $x=0;
+                    }
+                break;
+            }
+            
             
             if ($cur->pid->fail || $cur->pid)
             {
@@ -81,38 +115,58 @@ class Trie {
                 }   
                 
                 $a=false;
-                foreach (array_reverse($this->queue) as $k=>$v)
+                //foreach (array_reverse($this->queue) as $k=>$v)
+                foreach ($this->queue as $k=>$v)
                 {
                     if ($cur->char==$v->char && $cur->c!=$v->c)
                     {    
                         if ($cur->pid->char==$v->pid->char || $v->c==0)
+                        //if ($cur->pid->char==$v->pid->char)
                         {
                             if (is_object($v->fail) && $v->fail->c==0) {
                                 $cur->fail=$v;
+                                //$v->fail=$cur;
                                 $a=true;
                             } else if (!is_object($v->fail)) {
                                 $cur->fail=$v;
+                                //$v->fail=$cur;
                                 $a=true;
                             }
+                        } else if ($cur->pid->c==0) {
+                            //$v->fail=$cur;
+                            //$a=true;
                         }
+                        if ($a) break;
                     }
                 }
-                if ($a==false) {
+                if ($a==false && !is_object($cur->fail))  {
                     $cur->fail=$this->head;
                 }
+                //if ($x<3) {
+                //    //$this->queue[]=$cur;
+                //    ++$x;
+                //    array_push($this->queue,$cur);
+                //} else {
+                //    $x=0;
+                //}
                 
             } else
             {
+                //++$x;
+                //array_push($this->queue,$cur);
                 if ($cur->left) {
                     $cur->left->fail=$this->head;
+                    $visited[$cur->left->c]=true;
                     array_push($this->queue,$cur->left);
                 }
-                if ($cur->mid){
+                if ($cur->mid && !$visited[$cur->mid->c]){
                     $cur->mid->fail=$this->head;
+                    $visited[$cur->mid->c]=true;
                     array_push($this->queue,$cur->mid);
                 }
-                if ($cur->right) {
+                if ($cur->right && !$visited[$cur->right->c]) {
                     $cur->right->fail=$this->head;
+                    $visited[$cur->right->c]=true;
                     array_push($this->queue,$cur->right);
                 }    
             }
